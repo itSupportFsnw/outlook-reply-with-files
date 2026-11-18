@@ -1,0 +1,15 @@
+{
+  "name": "reply-with-attachments",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "certs": "office-addin-dev-certs install",
+    "start": "node server.js",
+    "validate": "office-addin-manifest validate manifest.xml",
+    "validate:local": "office-addin-manifest validate manifest.local.xml"
+  },
+  "devDependencies": {
+    "office-addin-dev-certs": "^1.13.0",
+    "office-addin-manifest": "^1.13.0"
+  }
+}

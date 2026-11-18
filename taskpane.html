@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <script src="shared.js"></script>
+</head>
+<body style="font-family: sans-serif; padding: 15px;">
+    <button id="actionBtn" style="padding: 10px 15px; font-size: 14px; cursor: pointer;" disabled>
+        Loading...
+    </button>
+    <p id="status" style="color: #555; font-size: 12px;"></p>
+
+    <script>
+        const status = (msg) => (document.getElementById("status").innerText = msg);
+
+        Office.onReady(() => {
+            const item = Office.context.mailbox.item;
+            const btn = document.getElementById("actionBtn");
+            const isCompose = typeof item.addFileAttachmentFromBase64Async === "function";
+
+            if (isCompose) {
+                btn.innerText = "Attach Saved Files";
+                btn.onclick = () => attachInCompose(item);
+            } else {
+                btn.innerText = "Reply with Attachments";
+                btn.onclick = () => replyWithAttachments(item).catch((e) => status("Error: " + (e.message || e)));
+            }
+            btn.disabled = false;
+        });
+
+        async function attachInCompose(item) {
+            try {
+                const n = await attachStashed(item, { ignoreAge: true });
+                status(n ? `Attached ${n} file(s).` : "No saved attachments (already attached or none saved).");
+            } catch (e) {
+                status("Error: " + (e.message || e));
+            }
+        }
+
+        async function replyWithAttachments(item) {
+            status("Reading attachments...");
+            const { saved: n, skipped } = await stashAndReply(item);
+            status(`Saved ${n} file(s); they'll be attached to the reply automatically.` +
+                   (skipped.length ? ` Skipped cloud attachments: ${skipped.join(", ")}` : "") +
+                   ` If they don't appear, click "Attach Saved Files" in the reply.`);
+        }
+    </script>
+</body>
+</html>
